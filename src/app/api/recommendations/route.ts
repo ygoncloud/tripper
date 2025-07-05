@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const recommendations = getRecommendations(budget, origin, {
+  const recommendations = await getRecommendations(budget, origin, {
     from: new Date(from),
     to: new Date(to),
   });
