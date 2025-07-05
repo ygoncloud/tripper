@@ -31,6 +31,89 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [sortOption, setSortOption] = useState("price-asc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [numTravelers, setNumTravelers] = useState<number>(1);
+
+  const handleBookNow = async (trip: TripRecommendation) => {
+    try {
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tripId: trip.id,
+          userId: "mock-user-123", // Replace with actual user ID from auth context
+          price: trip.totalCost,
+        }),
+      });
+
+      if (response.ok) {
+        const reservationResponse = await response.json();
+        alert("Reservation successful!");
+
+        const email = prompt("Please enter your email for confirmation:");
+        if (!email) {
+          alert("Email not provided. Skipping email confirmation.");
+          return;
+        }
+
+        // Simulate sending email confirmation
+        const emailResponse = await fetch("/api/email-confirmation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reservationId: reservationResponse.reservationId,
+            userEmail: email,
+            tripTitle: trip.title,
+          }),
+        });
+
+        if (emailResponse.ok) {
+          alert("Email confirmation sent!");
+        } else {
+          const emailErrorData = await emailResponse.json();
+          alert(`Email confirmation failed: ${emailErrorData.error}`);
+        }
+      } else {
+        const errorData = await response.json();
+        alert(`Reservation failed: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error booking trip:", error);
+      alert("An error occurred while booking the trip.");
+    }
+  };
+
+  const handleSaveTrip = async (trip: TripRecommendation) => {
+    try {
+      const response = await fetch("/api/saved-trips", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tripId: trip.id,
+          userId: "mock-user-123", // Mock user ID
+          title: trip.title,
+          description: trip.description,
+          totalCost: trip.totalCost,
+        }),
+      });
+
+      if (response.ok) {
+        alert("Trip saved successfully!");
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to save trip: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error saving trip:", error);
+      alert("An error occurred while saving the trip.");
+    }
+  };
 
   const handleGetRecommendations = async () => {
     if (!origin || !date?.from || !date?.to) {
@@ -41,7 +124,7 @@ export default function Home() {
     setShowRecommendations(true);
     const numericBudget = Number(budget.replace(/\./g, "")) || 0;
     const response = await fetch(
-      `/api/recommendations?budget=${numericBudget}&origin=${origin}&from=${date.from.toISOString()}&to=${date.to.toISOString()}`
+      `/api/recommendations?budget=${numericBudget}&origin=${origin}&from=${date.from.toISOString()}&to=${date.to.toISOString()}&tags=${selectedTags.join(',')}&travelers=${numTravelers}`
     );
     const data = await response.json();
     setRecommendations(data);
@@ -89,7 +172,10 @@ export default function Home() {
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex space-x-2">
+        <a href="/dashboard">
+          <Button variant="outline">Dashboard</Button>
+        </a>
         <ModeToggle />
       </div>
       <div className="container mx-auto px-4 md:px-6 py-12 md:py-24">
@@ -110,6 +196,16 @@ export default function Home() {
                 value={formattedBudget()}
                 onChange={handleBudgetChange}
               />
+              <Input
+                type="number"
+                placeholder="Number of Travelers"
+                className="flex-1"
+                min={1}
+                value={numTravelers}
+                onChange={(e) => setNumTravelers(Number(e.target.value))}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4">
               <Select onValueChange={setOrigin} value={origin}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Origin" />
@@ -201,6 +297,19 @@ export default function Home() {
                           </li>
                         </ul>
                       </div>
+                      <Button
+                        className="mt-4 w-full"
+                        onClick={() => handleBookNow(trip)}
+                      >
+                        Book Now
+                      </Button>
+                      <Button
+                        className="mt-2 w-full"
+                        variant="outline"
+                        onClick={() => handleSaveTrip(trip)}
+                      >
+                        Save Trip
+                      </Button>
                     </CardContent>
                   </Card>
                 ))

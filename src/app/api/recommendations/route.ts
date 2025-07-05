@@ -8,6 +8,8 @@ export async function GET(request: Request) {
   const origin = searchParams.get("origin") || "";
   const from = searchParams.get("from");
   const to = searchParams.get("to");
+  const tags = searchParams.get("tags");
+  const travelers = Number(searchParams.get("travelers")) || 1;
 
   if (!from || !to) {
     return NextResponse.json(
@@ -16,9 +18,15 @@ export async function GET(request: Request) {
     );
   }
 
-  const recommendations = await getRecommendations(budget, origin, {
-    from: new Date(from),
-    to: new Date(to),
-  });
+  const recommendations = await getRecommendations(
+    budget,
+    origin,
+    {
+      from: new Date(from),
+      to: new Date(to),
+    },
+    tags ? tags.split(",") : [],
+    travelers
+  );
   return NextResponse.json(recommendations);
 }

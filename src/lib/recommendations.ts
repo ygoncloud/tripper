@@ -29,7 +29,9 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 export const getRecommendations = async (
   budget: number,
   origin: string,
-  dateRange: { from: Date; to: Date }
+  dateRange: { from: Date; to: Date },
+  tags: string[],
+  travelers: number
 ): Promise<(Trip & { totalCost: number })[]> => {
   if (!origin || !dateRange.from || !dateRange.to) {
     return [];
@@ -46,8 +48,9 @@ export const getRecommendations = async (
 
   const prompt = `
     I have a budget of ${budget} IDR.
-    I want to travel from ${origin} between ${fromDate.toDateString()} and ${toDate.toDateString()} for ${nights} nights.
+    I want to travel from ${origin} between ${fromDate.toDateString()} and ${toDate.toDateString()} for ${nights} nights, for ${travelers} people.
     Suggest 3-5 travel destinations in Indonesia that fit my budget and preferences.
+    ${tags.length > 0 ? `Prioritize destinations with the following tags: ${tags.join(', ')}.` : ''}
     For each destination, provide:
     - id (unique number)
     - title (e.g., "Bali, Indonesia")
