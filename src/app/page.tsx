@@ -98,7 +98,7 @@ export default function Home() {
             Trip Planner
           </h1>
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 mb-8">
-            Enter your budget, origin, and travel dates, and we'll suggest a
+            Enter your budget, origin, and travel dates, and we&apos;ll suggest a
             trip for you.
           </p>
           <div className="max-w-md mx-auto space-y-4">
