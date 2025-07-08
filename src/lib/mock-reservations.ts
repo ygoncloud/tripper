@@ -15,6 +15,6 @@ export const addMockReservation = (reservation: Reservation): Reservation => {
   return reservation;
 };
 
-export const getMockReservations = (): Reservation[] => {
-  return mockReservations;
+export const getMockReservations = (userId: string): Reservation[] => {
+  return mockReservations.filter(reservation => reservation.userId === userId);
 };

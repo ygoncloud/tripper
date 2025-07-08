@@ -2,48 +2,64 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SavedTrip } from "@/lib/mock-saved-trips";
 import { Reservation } from "@/lib/mock-reservations";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
   const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock user ID - in a real app, this would come from authentication
-  const userId = "mock-user-123";
-
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch saved trips
-        const savedTripsResponse = await fetch(`/api/saved-trips?userId=${userId}`);
-        const savedTripsData = await savedTripsResponse.json();
-        setSavedTrips(savedTripsData);
+    if (status === "authenticated") {
+      const fetchData = async () => {
+        setLoading(true);
+        try {
+          // Fetch saved trips
+          const savedTripsResponse = await fetch("/api/saved-trips");
+          const savedTripsData = await savedTripsResponse.json();
+          setSavedTrips(savedTripsData);
 
-        // Fetch reservations
-        const reservationsResponse = await fetch(`/api/reservations?userId=${userId}`);
-        const reservationsData = await reservationsResponse.json();
-        setReservations(reservationsData);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+          // Fetch reservations
+          const reservationsResponse = await fetch("/api/reservations");
+          const reservationsData = await reservationsResponse.json();
+          setReservations(reservationsData);
+        } catch (error) {
+          console.error("Error fetching dashboard data:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchData();
-  }, [userId]);
+      fetchData();
+    } else if (status === "unauthenticated") {
+      setLoading(false);
+    }
+  }, [status]);
 
-  if (loading) {
+  if (status === "loading" || loading) {
     return <div className="flex justify-center items-center min-h-screen">Loading dashboard...</div>;
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <h1 className="text-4xl font-bold mb-8 text-center">Please sign in to view your dashboard</h1>
+        <Button onClick={() => signIn()}>Sign In</Button>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold mb-8 text-center">Your Dashboard</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-center">Your Dashboard</h1>
+        <Button onClick={() => signOut()}>Sign Out</Button>
+      </div>
 
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Saved Trips</h2>

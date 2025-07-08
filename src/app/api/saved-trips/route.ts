@@ -1,12 +1,18 @@
 
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 import { addMockSavedTrip, getMockSavedTrips, SavedTrip } from "@/lib/mock-saved-trips";
 
 export async function POST(request: Request) {
+  const session = await getServerSession();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const savedTripData: SavedTrip = await request.json();
 
-    if (!savedTripData.tripId || !savedTripData.userId || !savedTripData.title) {
+    if (!savedTripData.tripId || !savedTripData.title) {
       return NextResponse.json(
         { error: "Missing required saved trip data" },
         { status: 400 }
@@ -15,6 +21,7 @@ export async function POST(request: Request) {
 
     savedTripData.id = `SAVED-${Date.now()}`;
     savedTripData.savedAt = new Date().toISOString();
+    savedTripData.userId = session.user.id;
 
     const newSavedTrip = addMockSavedTrip(savedTripData);
 
@@ -29,16 +36,11 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
-
-  if (!userId) {
-    return NextResponse.json(
-      { error: "User ID is required" },
-      { status: 400 }
-    );
+  const session = await getServerSession();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const savedTrips = getMockSavedTrips(userId);
+  const savedTrips = getMockSavedTrips(session.user.id);
   return NextResponse.json(savedTrips);
 }

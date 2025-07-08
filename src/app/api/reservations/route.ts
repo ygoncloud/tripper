@@ -1,30 +1,31 @@
 
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 import { addMockReservation, Reservation } from "@/lib/mock-reservations";
 
 import { getMockReservations } from "@/lib/mock-reservations";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
-
-  if (!userId) {
-    return NextResponse.json(
-      { error: "User ID is required" },
-      { status: 400 }
-    );
+  const session = await getServerSession();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const reservations = getMockReservations(); // In a real app, you'd filter by userId here
+  const reservations = getMockReservations(session.user.id); // In a real app, you'd filter by userId here
   return NextResponse.json(reservations);
 }
 
 export async function POST(request: Request) {
+  const session = await getServerSession();
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const reservationData: Reservation = await request.json();
 
     // Basic validation
-    if (!reservationData.tripId || !reservationData.userId || !reservationData.price) {
+    if (!reservationData.tripId || !reservationData.price) {
       return NextResponse.json(
         { error: "Missing required reservation data" },
         { status: 400 }
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
     reservationData.reservationId = `RES-${Date.now()}`;
     reservationData.status = "confirmed"; // Mocking immediate confirmation
     reservationData.date = new Date().toISOString();
+    reservationData.userId = session.user.id;
 
     const newReservation = addMockReservation(reservationData);
 
