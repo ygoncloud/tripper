@@ -252,7 +252,7 @@ export default function Home() {
     <>
       {showSplash ? (
         <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-          <img src="/tripper-icon.svg" alt="Tripper Logo" className="w-24 h-24 text-gray-800 dark:text-gray-200 animate-pulse" />
+          <img src="/tanaya-icon.svg" alt="tanaya Logo" className="w-24 h-24 text-gray-800 dark:text-gray-200 animate-pulse" />
         </div>
       ) : (
         <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -265,7 +265,7 @@ export default function Home() {
           <div className="container mx-auto px-4 md:px-6 py-12 md:py-24">
             <div className="max-w-3xl mx-auto text-center">
               <div className="flex items-center justify-center mb-4">
-                <img src="/tripper-home.png" alt="Tripper Home Logo" />
+                <img src="/tanaya-home.png" alt="tanaya Home Logo" />
               </div>
               <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 mb-8">
                 Enter your budget, origin, and travel dates, and we&apos;ll suggest a
@@ -413,7 +413,7 @@ export default function Home() {
           </div>
           <footer className="absolute bottom-4 text-center w-full">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Made with ❤️ by ygoncloud
+              Made with ❤️ by <a href="https://ygoncloud.web.id" target="_blank" rel="noopener noreferrer" className="underline">ygoncloud</a>
             </p>
           </footer>
         </div>

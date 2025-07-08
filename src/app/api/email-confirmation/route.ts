@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       Your reservation (ID: ${reservationId}) for ${tripTitle} has been successfully confirmed.
       You will receive further details shortly.
 
-      Thank you for booking with Tripper!
+      <h1>Thank you for booking with tanaya!</h1>
       -------------------------------
     `);
 
